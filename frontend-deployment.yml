@@ -1,0 +1,3 @@
+Kind: Deployment
+apiVersion: apps/v1
+

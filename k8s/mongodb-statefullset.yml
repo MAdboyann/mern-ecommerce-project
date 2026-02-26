@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-state
+  namespace: mern-app
+spec:
+  selector:
+    matchLabels:
+      app: mongodb-app
+  serviceName: "mongodb-svc"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongodb-app
+    spec:
+      containers:
+        - name: mongodb-cont
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-pvc
+              mountPath: /mnt/data/mongo
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-pvc
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

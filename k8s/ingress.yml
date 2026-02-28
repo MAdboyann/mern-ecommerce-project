@@ -9,7 +9,6 @@ spec:
     - host:
       http:
         paths:
-
           # Backend routes FIRST
           - path: /auth
             pathType: Prefix

@@ -11,12 +11,13 @@ grafana:
     type: ClusterIP
 
 prometheus:
+  enabled: true
   prometheusSpec:
     retention: 7d
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: gp3
+          storageClassName: gp2
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:

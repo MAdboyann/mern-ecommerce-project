@@ -1,0 +1,18 @@
+resource "kubernetes_config_map" "backend_config" {
+  metadata {
+    name      = "backend-config"
+    namespace = kubernetes_namespace.mern.metadata[0].name
+  }
+
+  data = {
+    MONGO_URI                        = "mongodb://mongodb-svc:27017/ecommerce-shop"
+    ORIGIN                           = "http://aadf924da576b4aa4ad1a06a5162aa6c-95753921.us-east-1.elb.amazonaws.com"
+    LOGIN_TOKEN_EXPIRATION            = "30d"
+    OTP_EXPIRATION_TIME               = "120000"
+    PASSWORD_RESET_TOKEN_EXPIRATION   = "2m"
+    COOKIE_EXPIRATION_DAYS            = "30"
+    SECRET_KEY                        = "devsecret123"
+    PRODUCTION                        = "false"
+    PORT                              = "8000"
+  }
+}

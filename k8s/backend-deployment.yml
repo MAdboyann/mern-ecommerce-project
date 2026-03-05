@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
-  namespace: mern-app   # ✅ CORRECT PLACE
+  namespace: mern-app # ✅ CORRECT PLACE
   labels:
     app: backend-app
 spec:
@@ -18,6 +18,7 @@ spec:
       containers:
         - name: backend-container
           image: manthan010/backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
           envFrom:

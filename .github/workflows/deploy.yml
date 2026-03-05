@@ -1,4 +1,4 @@
-name: Ecommerce-mern-app-ci-cd
+name: MERN-CICD
 
 on:
   push:
@@ -6,36 +6,46 @@ on:
       - main
 
 env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
   CLUSTER_NAME: mern-app
 
 jobs:
-  deploy:
+
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: DockerHub Login
+      - name: Login DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-      - name: Build Backend Image
+      - name: Build Backend
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest ./backend
 
-      - name: Push Backend Image
+      - name: Push Backend
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
 
-      - name: Build Frontend Image
+      - name: Build Frontend
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./frontend
 
-      - name: Push Frontend Image
+      - name: Push Frontend
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
 
-      - name: Configure AWS Credentials
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -43,19 +53,33 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v3
 
-      - name: Update kubeconfig
+      - name: Connect to EKS
         run: |
-          aws eks update-kubeconfig \
-            --region $AWS_REGION \
-            --name $CLUSTER_NAME
+          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      - name: Deploy to Kubernetes
+      - name: Create namespace
+        run: kubectl apply -f k8s/namespace.yaml
+
+      - name: Deploy MongoDB
         run: |
-          kubectl apply -f k8s/
-          
-      - name: Restart deployments
+          kubectl apply -f k8s/mongodb-pv.yml
+          kubectl apply -f k8s/pvc.yml
+          kubectl apply -f k8s/mongodb-statefullset.yml
+          kubectl apply -f k8s/mongodb-service.yml
+
+      - name: Deploy Backend
         run: |
-          kubectl rollout restart deployment/backend-deployment -n mern-app
-          kubectl rollout restart deployment/frontend-deployment -n mern-app
+          kubectl apply -f k8s/config-map.yml
+          kubectl apply -f k8s/backend-deployment.yml
+          kubectl apply -f k8s/backend-service.yml
+
+      - name: Deploy Frontend
+        run: |
+          kubectl apply -f k8s/frontend-deployment.yml
+          kubectl apply -f k8s/frontend-service.yml
+
+      - name: Deploy Ingress
+        run: |
+          kubectl apply -f k8s/ingress.yml

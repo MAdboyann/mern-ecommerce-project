@@ -10,7 +10,6 @@ env:
   CLUSTER_NAME: mern-app
 
 jobs:
-
   build-and-push:
     runs-on: ubuntu-latest
 
@@ -58,6 +57,13 @@ jobs:
       - name: Connect to EKS
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+      - name: Make script executable
+        run: chmod +x scripts/setup.sh
+
+      - name: Deploy Ingress + Monitoring
+        run: |
+          cd scripts
+          ./setup.sh
 
       - name: Create namespace
         run: kubectl apply -f k8s/namespace.yml

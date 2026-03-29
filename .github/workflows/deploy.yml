@@ -70,10 +70,10 @@ jobs:
 
       - name: Deploy MongoDB
         run: |
-          kubectl apply -f k8s/mongodb-pv.yml
+          kubectl apply -f k8s/pv.yml
           kubectl apply -f k8s/pvc.yml
           kubectl apply -f k8s/mongodb-statefullset.yml
-          kubectl apply -f k8s/mongodb-service.yml
+          kubectl apply -f k8s/mongodb-service.yml 
 
       - name: Deploy Backend
         run: |

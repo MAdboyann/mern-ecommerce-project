@@ -3,7 +3,7 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.29"
+  cluster_version = "1.34"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -13,15 +13,16 @@ module "eks" {
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = true
   enable_cluster_creator_admin_permissions = true
-
- cluster_addons = {
+  cluster_addons = {
   aws-ebs-csi-driver = {
-    most_recent              = true
-    service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
+    most_recent                 = true
+    service_account_role_arn    = module.ebs_csi_irsa.iam_role_arn
+    resolve_conflicts_on_create = "OVERWRITE"  # or "PRESERVE" depending on your needs
+    resolve_conflicts_on_update = "OVERWRITE"  # or "PRESERVE" depending on your needs
   }
 }
 
-  eks_managed_node_groups = {
+eks_managed_node_groups = {
     prod_spot_nodes = {
       instance_types = ["t3.medium"]
       capacity_type  = "SPOT"

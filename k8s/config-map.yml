@@ -5,7 +5,7 @@ metadata:
   namespace: mern-app
 data:
   MONGO_URI: "mongodb://mongodb-svc:27017/ecommerce-shop"
-  ORIGIN: "http://a77e7ec125c7a49ab892e246a2b69f54-1243961074.us-east-1.elb.amazonaws.com"
+  ORIGIN: "http://100.26.238.103"
   LOGIN_TOKEN_EXPIRATION: "30d"
   OTP_EXPIRATION_TIME: "120000"
   PASSWORD_RESET_TOKEN_EXPIRATION: "2m"

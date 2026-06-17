@@ -5,6 +5,7 @@ metadata:
   namespace: mern-app
 spec:
   accessModes:
+  storageClassName: gp3
     - ReadWriteOnce
   resources:
     requests:

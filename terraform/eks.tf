@@ -24,10 +24,10 @@ module "eks" {
 
 eks_managed_node_groups = {
     prod_spot_nodes = {
-      instance_types = ["t3.medium"]
+      instance_types = ["t2.medium"]
       capacity_type  = "SPOT"
 
-      min_size     = 1
+      min_size     = 2
       max_size     = 2
       desired_size = 2
     }

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Versions
+HELM_INSTALL_SCRIPT="https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+
+echo "Checking kubectl..."
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "ERROR: kubectl is not installed."
+  exit 1
+fi
+
+echo "Checking cluster connectivity..."
+kubectl cluster-info >/dev/null
+
+echo "Checking Helm..."
+if ! command -v helm >/dev/null 2>&1; then
+  echo "Installing Helm..."
+  curl -fsSL "${HELM_INSTALL_SCRIPT}" -o get_helm.sh
+  chmod 700 get_helm.sh
+  ./get_helm.sh
+  rm -f get_helm.sh
+else
+  echo "Helm already installed:"
+  helm version
+fi
+
+echo "Adding ingress-nginx Helm repository..."
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+echo "Creating namespace..."
+kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
+
+echo "Installing/Upgrading NGINX Ingress Controller..."
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --set controller.replicaCount=2
+
+echo "Waiting for deployment..."
+kubectl rollout status deployment/ingress-nginx-controller \
+  -n ingress-nginx \
+  --timeout=10m
+
+echo "Installation complete."
+echo
+echo "Ingress Controller Pods:"
+kubectl get pods -n ingress-nginx
+
+echo
+echo "Ingress Controller Service:"
+kubectl get svc -n ingress-nginx
